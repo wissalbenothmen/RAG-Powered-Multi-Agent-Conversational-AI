@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Chat Logo" class="chat-logo">
+        <h1 class="chat-title">Assistant IA</h1>
+        <button id="new-session-btn" class="new-session-btn">New Session</button>
+    </div>
+    <div class="chat-messages" id="chat-messages" style="font-size: 13px;">
+        {% for msg in conversation %}
+            {% if msg.type == 'user' %}
+                <div class="message user-message animate__animated animate__fadeInRight">
+                    <strong>You :</strong> {{ msg.content }}
+                </div>
+            {% else %}
+                <div class="message assistant-message animate__animated animate__fadeInLeft">
+                    <strong>Assistant :</strong> {{ msg.content }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <form id="chat-form" class="chat-input">
+        <input type="text" name="user_input" id="user-input" placeholder="Posez votre question..." required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+<script>
+    document.getElementById('new-session-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/new_session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById('chat-messages').innerHTML = '';
+                alert('New session started!');
+            }
+        } catch (error) {
+            console.error('Error starting new session:', error);
+        }
+    });
+</script>
+{% endblock %}

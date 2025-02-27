@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Feedback Dashboard</h1>
+        <p class="last-update">Last update: <span id="update-time"></span></p>
+    </div>
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <i class="fas fa-comments"></i>
+            <div class="metric-content">
+                <h3>Total Feedback</h3>
+                <p id="total-feedback">0</p>
+            </div>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-star"></i>
+            <div class="metric-content">
+                <h3>Average Satisfaction</h3>
+                <p id="avg-satisfaction">0.0</p>
+            </div>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-clock"></i>
+            <div class="metric-content">
+                <h3>Average Response Time</h3>
+                <p id="avg-response-time">0.0s</p>
+            </div>
+        </div>
+    </div>
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Comments Word Cloud</h3>
+            <div id="feedback-cloud-container"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Questions Word Cloud</h3>
+            <div id="questions-cloud-container"></div>
+        </div>
+        <div class="chart-card">
+            <h3>Satisfaction by Domain</h3>
+            <canvas id="domain-satisfaction-chart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Score Distribution</h3>
+            <canvas id="satisfaction-distribution-chart"></canvas>
+        </div>
+        <div class="chart-card wide">
+            <h3>Satisfaction Trend</h3>
+            <canvas id="satisfaction-trend-chart"></canvas>
+        </div>
+        <div class="chart-card feedback-table-card wide">
+            <div class="feedback-table-header">
+                <h3>🎯 Relevant Feedback</h3>
+                <div class="feedback-filters">
+                    <select id="domainFilter" class="feedback-filter">
+                        <option value="">All domains</option>
+                    </select>
+                    <select id="scoreFilter" class="feedback-filter">
+                        <option value="">All scores</option>
+                        <option value="1">1 ⭐</option>
+                        <option value="2">2 ⭐</option>
+                        <option value="3">3 ⭐</option>
+                        <option value="4">4 ⭐</option>
+                        <option value="5">5 ⭐</option>
+                    </select>
+                    <button id="exportFeedback" class="feedback-export-btn">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="feedback-table-container">
+                <table id="feedbackTable" class="feedback-table">
+                    <thead>
+                        <tr>
+                            <th>Score</th>
+                            <th>Domain</th>
+                            <th>Question</th>
+                            <th>Comment</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

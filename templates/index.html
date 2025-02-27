@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="welcome-container">
+    <div class="welcome-header">
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="welcome-logo">
+        <h1 class="welcome-title">RAG Multi-Agent System</h1>
+    </div>
+    <div class="welcome-content">
+        <h2 class="welcome-subtitle">Welcome to your AI Assistant</h2>
+        <p class="welcome-description">
+            Ask your questions and get accurate answers using our AI system 
+            based on RAG (Retrieval-Augmented Generation).
+        </p>
+        <div class="features">
+            <div class="feature">
+                <i class="feature-icon">🎯</i>
+                <h3>Accurate Answers</h3>
+                <p>Get relevant answers based on reliable sources</p>
+            </div>
+            <div class="feature">
+                <i class="feature-icon">🔍</i>
+                <h3>Verifiable Sources</h3>
+                <p>Check the sources used for each answer</p>
+            </div>
+            <div class="feature">
+                <i class="feature-icon">💡</i>
+                <h3>Smart AI</h3>
+                <p>Benefit from AI enhanced with contextual data</p>
+            </div>
+        </div>
+        <a href="{{ url_for('chat') }}" class="start-button">Start Conversation</a>
+    </div>
+</div>
+{% endblock %}

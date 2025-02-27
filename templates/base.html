@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG-Powered-Multi-Agent-Conversational</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        :root {
+            --body-color: #e9eefc; --sidebar-color: #FFF; --primary-color: #2196f3;
+            --primary-color-light: #F6F5FF; --toggle-color: #DDD; --text-color: #131313;
+            --tran-03: all 0.2s ease; --tran-04: all 0.3s ease; --tran-05: all 0.3s ease;
+        }
+        body { min-height: 100vh; background-color: var(--body-color); transition: var(--tran-05); }
+        ::selection { background-color: var(--primary-color); color: #fff; }
+        body.dark {
+            --body-color: #18191a; --sidebar-color: #242526; --primary-color: #3a3b3c;
+            --primary-color-light: #3a3b3c; --toggle-color: #fff; --text-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+                </span>
+                <div class="text logo-text">
+                    <span class="name">GenAI-RAG</span>
+                    <span class="profession">Multi-agent</span>
+                </div>
+            </div>
+            <i class='bx bx-chevron-right toggle'></i>
+        </header>
+        <div class="menu-bar">
+            <div class="menu">
+                <li class="search-box">
+                    <i class='bx bx-search icon'></i>
+                    <input type="text" placeholder="Search...">
+                </li>
+                <ul class="menu-links">
+                    <li class="nav-link">
+                        <a href="{{ url_for('index') }}">
+                            <i class='bx bx-home-alt icon'></i>
+                            <span class="text nav-text">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="{{ url_for('dashboard') }}">
+                            <i class='bx bx-bar-chart-alt-2 icon'></i>
+                            <span class="text nav-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="{{ url_for('chat') }}">
+                            <i class='bx bx-chat icon'></i>
+                            <span class="text nav-text">Chat</span>
+                        </a>
+                    </li>
+                    <li class="nav-link">
+                        <a href="{{ url_for('history') }}">
+                            <i class='bx bx-history icon'></i>
+                            <span class="text nav-text">History</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="bottom-content">
+                <li class="mode">
+                    <div class="sun-moon">
+                        <i class='bx bx-moon icon moon'></i>
+                        <i class='bx bx-sun icon sun'></i>
+                    </div>
+                    <span class="mode-text text">Dark mode</span>
+                    <div class="toggle-switch">
+                        <span class="switch"></span>
+                    </div>
+                </li>
+            </div>
+        </div>
+    </nav>
+    <section class="home">
+        <div class="text">{% block content %}{% endblock %}</div>
+    </section>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

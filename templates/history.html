@@ -1,0 +1,677 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="history-container animate__animated animate__fadeIn">
+    <div class="history-header">
+        <h1 class="history-title"><i class="fas fa-history"></i> Chat History</h1>
+        <div class="history-search">
+            <input type="text" id="search-input" placeholder="Search chat titles..." class="search-bar">
+            <button id="clear-search" class="clear-btn" aria-label="Clear search"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+    <div class="history-list" id="history-list">
+        {% if chat_history|length == 0 %}
+            <div class="no-history animate__animated animate__pulse">
+                <i class="fas fa-comment-slash"></i>
+                <p>No chat history available yet. Start a conversation to see it here!</p>
+            </div>
+        {% else %}
+            {% for session in chat_history %}
+            <div class="history-item animate__animated animate__fadeInUp" data-session-id="{{ session.session_id }}">
+                <div class="history-header" onclick="toggleContent(this)">
+                    <div class="header-left">
+                        <span class="history-title-wrapper">
+                            <i class="fas fa-comment-dots title-icon"></i>
+                            <span class="history-title-text">{{ session.title }}</span>
+                        </span>
+                        <span class="history-timestamp">{{ session.timestamp|datetimeformat }}</span>
+                    </div>
+                    <div class="history-actions">
+                        <button class="rename-btn" onclick="showRenameModal('{{ session.session_id }}', '{{ session.title }}', event)" aria-label="Rename session">
+                            <i class="fas fa-edit"></i> Rename
+                        </button>
+                        <button class="delete-btn" onclick="deleteSession('{{ session.session_id }}', event)" aria-label="Delete session">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="history-content">
+                    {% for msg in session.conversation %}
+                        {% if msg.type == 'user' %}
+                            <div class="message user-message animate__animated animate__slideInRight">
+                                <strong>Vous :</strong> {{ msg.content }}
+                            </div>
+                        {% else %}
+                            <div class="message assistant-message animate__animated animate__slideInLeft">
+                                <strong>Assistant :</strong> {{ msg.content|safe }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Rename Modal -->
+<div id="rename-modal" class="modal">
+    <div class="modal-content animate__animated animate__zoomIn">
+        <span class="close-modal" onclick="hideRenameModal()">&times;</span>
+        <h2>Rename Session</h2>
+        <form id="rename-form">
+            <input type="hidden" id="rename-session-id" name="session_id">
+            <label for="rename-title">New Title:</label>
+            <input type="text" id="rename-title" name="title" required>
+            <div class="modal-actions">
+                <button type="submit" class="submit-btn">Save</button>
+                <button type="button" class="cancel-btn" onclick="hideRenameModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+<script>
+    function toggleContent(header) {
+        const content = header.nextElementSibling;
+        const isVisible = content.style.display === 'block';
+        content.style.display = isVisible ? 'none' : 'block';
+        header.classList.toggle('expanded', !isVisible);
+    }
+
+    async function deleteSession(sessionId, event) {
+        event.stopPropagation();
+        if (confirm('Are you sure you want to delete this session?')) {
+            try {
+                const response = await fetch(`/delete_session/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    const item = document.querySelector(`.history-item[data-session-id="${sessionId}"]`);
+                    item.classList.add('animate__fadeOut');
+                    setTimeout(() => item.remove(), 500);
+                }
+            } catch (error) {
+                console.error('Error deleting session:', error);
+                alert('Failed to delete session. Please try again.');
+            }
+        }
+    }
+
+    function showRenameModal(sessionId, currentTitle, event) {
+        event.stopPropagation();
+        const modal = document.getElementById('rename-modal');
+        const form = document.getElementById('rename-form');
+        const sessionIdInput = document.getElementById('rename-session-id');
+        const titleInput = document.getElementById('rename-title');
+
+        sessionIdInput.value = sessionId;
+        titleInput.value = currentTitle;
+        modal.style.display = 'block';
+
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            const newTitle = titleInput.value.trim();
+            if (newTitle) {
+                try {
+                    const response = await fetch(`/rename_session/${sessionId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: newTitle })
+                    });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        const titleElement = document.querySelector(`.history-item[data-session-id="${sessionId}"] .history-title-text`);
+                        titleElement.textContent = data.new_title;
+                        titleElement.previousElementSibling.classList.add('animate__animated', 'animate__tada');
+                        setTimeout(() => titleElement.previousElementSibling.classList.remove('animate__animated', 'animate__tada'), 1000);
+                        hideRenameModal();
+                    }
+                } catch (error) {
+                    console.error('Error renaming session:', error);
+                    alert('Failed to rename session. Please try again.');
+                }
+            }
+        };
+    }
+
+    function hideRenameModal() {
+        const modal = document.getElementById('rename-modal');
+        modal.classList.add('animate__zoomOut');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            modal.classList.remove('animate__zoomOut');
+        }, 300);
+    }
+
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        document.querySelectorAll('.history-item').forEach(item => {
+            const title = item.querySelector('.history-title-text').textContent.toLowerCase();
+            item.style.display = title.includes(query) ? 'block' : 'none';
+        });
+    });
+
+    document.getElementById('clear-search').addEventListener('click', function() {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('rename-modal');
+        if (event.target === modal) {
+            hideRenameModal();
+        }
+    };
+</script>
+
+<style>
+    /* Existing styles unchanged up to this point */
+    .history-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 25px;
+        background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        border-radius: 15px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .history-container:hover {
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 3px solid #2196f3;
+        background: linear-gradient(to right, transparent, rgba(33, 150, 243, 0.05));
+    }
+
+    .history-title {
+        color: #2196f3;
+        font-size: 28px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .history-search {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .search-bar {
+        padding: 10px 15px 10px 40px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 14px;
+        width: 250px;
+        background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%232196f3" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') no-repeat 12px center;
+        background-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar:focus {
+        border-color: #2196f3;
+        box-shadow: 0 0 6px rgba(33, 150, 243, 0.4);
+        width: 270px;
+    }
+
+    .clear-btn {
+        background: #f44336;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+    }
+
+    .clear-btn:hover {
+        background: #d32f2f;
+        transform: scale(1.1) rotate(90deg);
+    }
+
+    .history-list {
+        max-height: 70vh;
+        overflow-y: auto;
+        padding-right: 10px;
+        scrollbar-width: thin;
+    }
+
+    .history-item {
+        margin-bottom: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .history-item:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .history-header {
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fafafa;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+
+    .history-header.expanded {
+        background: #e3f2fd;
+        border-bottom: 2px solid #2196f3;
+    }
+
+    .header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .history-title-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .title-icon {
+        color: #2196f3;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .history-header.expanded .title-icon {
+        color: #1976d2;
+        transform: rotate(360deg);
+    }
+
+    .history-title-text {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .history-timestamp {
+        font-size: 12px;
+        color: #888;
+        font-style: italic;
+    }
+
+    .history-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .history-actions button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .rename-btn {
+        background: #2196f3;
+        color: white;
+    }
+
+    .rename-btn:hover {
+        background: #1976d2;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+    }
+
+    .delete-btn {
+        background: #f44336;
+        color: white;
+    }
+
+    .delete-btn:hover {
+        background: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(244, 67, 54, 0.3);
+    }
+
+    .history-content {
+        display: none;
+        padding: 20px;
+        background: #fff;
+        border-top: 1px solid #eee;
+    }
+
+    .message {
+        max-width: 90%;
+        margin-bottom: 15px;
+        padding: 12px 18px;
+        border-radius: 10px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+
+    .message:hover {
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-message {
+        margin-left: auto;
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+    }
+
+    .assistant-message {
+        margin-right: auto;
+        background: #f5f5f5;
+        border-left: 4px solid #4caf50;
+    }
+
+    .no-history {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-align: center;
+        color: #666;
+        font-size: 16px;
+        padding: 25px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .no-history i {
+        font-size: 36px;
+        color: #2196f3;
+    }
+
+    .history-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .history-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+        background: #2196f3;
+        border-radius: 4px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb:hover {
+        background: #1976d2;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+        transition: all 0.3s ease;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        width: 90%;
+        max-width: 400px;
+    }
+
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .close-modal:hover,
+    .close-modal:focus {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .modal-content h2 {
+        margin: 0 0 20px;
+        font-size: 20px;
+        color: #2196f3;
+    }
+
+    .modal-content form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .modal-content label {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .modal-content input[type="text"] {
+        padding: 10px;
+        font-size: 14px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: border-color 0.3s ease;
+    }
+
+    .modal-content input[type="text"]:focus {
+        border-color: #2196f3;
+        outline: none;
+        box-shadow: 0 0 5px rgba(33, 150, 243, 0.3);
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .modal-actions button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn {
+        background: #2196f3;
+        color: white;
+    }
+
+    .submit-btn:hover {
+        background: #1976d2;
+        transform: translateY(-2px);
+    }
+
+    .cancel-btn {
+        background: #f44336;
+        color: white;
+    }
+
+    .cancel-btn:hover {
+        background: #d32f2f;
+        transform: translateY(-2px);
+    }
+
+    /* Dark Mode for Modal */
+    body.dark .modal-content {
+        background-color: #3a3b3c;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    }
+
+    body.dark .modal-content h2 {
+        color: #64b5f6;
+    }
+
+    body.dark .modal-content label {
+        color: #ccc;
+    }
+
+    body.dark .modal-content input[type="text"] {
+        background: #2c2d2e;
+        border-color: #555;
+        color: #ccc;
+    }
+
+    body.dark .modal-content input[type="text"]:focus {
+        border-color: #64b5f6;
+        box-shadow: 0 0 5px rgba(100, 181, 246, 0.3);
+    }
+
+    body.dark .submit-btn {
+        background: #64b5f6;
+    }
+
+    body.dark .submit-btn:hover {
+        background: #42a5f5;
+    }
+
+    body.dark .cancel-btn {
+        background: #ef5350;
+    }
+
+    body.dark .cancel-btn:hover {
+        background: #e53935;
+    }
+
+    /* Existing dark mode styles */
+    body.dark .history-container {
+        background: linear-gradient(135deg, #2c2d2e, #242526);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    body.dark .history-item {
+        background: #3a3b3c;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark .history-header {
+        background: #2c2d2e;
+    }
+
+    body.dark .history-header.expanded {
+        background: #3a3b3c;
+        border-bottom-color: #555;
+    }
+
+    body.dark .history-title-text {
+        color: #ccc;
+    }
+
+    body.dark .history-timestamp {
+        color: #bbb;
+    }
+
+    body.dark .history-content {
+        background: #3a3b3c;
+        border-top-color: #555;
+    }
+
+    body.dark .user-message {
+        background: #3a3b3c;
+    }
+
+    body.dark .assistant-message {
+        background: #242526;
+    }
+
+    body.dark .no-history {
+        background: #3a3b3c;
+        color: #bbb;
+    }
+
+    body.dark .no-history i {
+        color: #64b5f6;
+    }
+
+    body.dark .search-bar {
+        background: #242526 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%2364b5f6" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') no-repeat 12px center;
+        border-color: #555;
+        color: #ccc;
+    }
+
+    body.dark .title-icon {
+        color: #64b5f6;
+    }
+
+    body.dark .history-header.expanded .title-icon {
+        color: #42a5f5;
+    }
+
+    @media (max-width: 768px) {
+        .history-container {
+            margin: 15px;
+            padding: 15px;
+        }
+
+        .history-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding-left: 35px;
+        }
+
+        .history-actions {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 20% auto;
+        }
+    }
+</style>
+{% endblock %}

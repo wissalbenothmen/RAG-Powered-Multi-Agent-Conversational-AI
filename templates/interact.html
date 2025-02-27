@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="interact-container">
+    <div class="interact-header">
+        <h1>Interact with ArXiv Article: {{ arxiv_id }}</h1>
+    </div>
+    <div class="interact-messages" id="interact-messages" style="font-size: 13px;">
+        {% for message in messages %}
+            {% if message.type == 'user' %}
+                <div class="message user-message animate__animated animate__fadeInRight">
+                    <strong>You:</strong> {{ message.content }}
+                </div>
+            {% elif message.type == 'assistant' %}
+                <div class="message assistant-message animate__animated animate__fadeInLeft">
+                    <strong>Assistant:</strong>
+                    <div class="answer markdown-body">{{ message.content | safe }}</div>
+                    {% if message.pdf_url %}
+                        <div class="pdf-link">
+                            <strong>Article URL:</strong> <a href="{{ message.pdf_url }}" target="_blank">{{ message.pdf_url }}</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <form id="interact-form" class="interact-input">
+        <input type="text" name="query" id="interact-input" placeholder="Ask a question about this PDF..." required>
+        <button type="submit">Send</button>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
