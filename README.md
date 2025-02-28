@@ -326,6 +326,7 @@ The system leverages Google Cloud Storage (GCS) and Cloud SQL PostgreSQL for sca
 ![Screenshot of the Application](Screenshots/cloud2.png)
 
 ## demonstation of interfaces
+**Video Demonstration**: Watch the full system in action on YouTube: https://youtu.be/sAQJbpf_1Kk
 The web interface provides an intuitive user experience, with key functionalities demonstrated below through screenshots:
 * **index interface**
 The landing page welcomes users, offering an entry point to start conversations and explore features
