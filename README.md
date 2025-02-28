@@ -1,7 +1,23 @@
 # RAG Multi-Agent System: An Advanced Conversational AI
 
 This project implements a sophisticated conversational AI system leveraging Retrieval-Augmented Generation (RAG) and a multi-agent architecture.  It provides a web interface for users to interact with the AI, ask questions, and receive accurate, context-aware answers supported by verifiable sources.  The system integrates Google's Gemini 1.5 Pro language model, a PostgreSQL database for chat history and feedback, and a FAISS vector database for document retrieval. The project also includes robust evaluation capabilities and a comprehensive dashboard for monitoring performance and user feedback.
-
+## Key Features
+✅ - Retrieval-Augmented Generation (RAG): Combines real-time document retrieval with LLM generation for factual accuracy.
+✅ - Multi-Agent Architecture: Modular agents handle input processing, retrieval, prompt engineering, answer generation, source tracking, and feedback collection.
+✅ - Google Gemini 1.5 Pro: Powers natural language understanding and generation.
+✅ - PostgreSQL on Cloud SQL: Stores chat sessions and feedback with JSONB support for flexibility.
+✅ - FAISS Vector Database: Enables efficient similarity search using all-MiniLM-L6-v2 embeddings.
+✅ - Google Cloud Storage: Manages document corpus and FAISS index in rag-multiagent-documents and rag-multiagent-index buckets.
+✅ - arXiv Integration: Augments responses with downloadable research papers.
+✅ - Web Search Fallback: Supplements answers when local context is insufficient.
+✅ - Interactive Document Exploration: Allows querying specific arXiv papers via /interact/<arxiv_id>.
+✅ - User Feedback Collection: Captures satisfaction scores, domains, and comments.
+✅ - Comprehensive Dashboard: Displays real-time metrics and visualizations (e.g., word clouds, satisfaction trends).
+✅ - Chat History: Enables viewing, renaming, and deleting past sessions.
+✅ - "Explain More" Functionality: Expands previous answers on request.
+✅ - Document Processing: Manual triggering via /process-docs for index updates.
+✅ - Robust Error Handling: Ensures stability with logging and fallbacks.
+✅ - Automated Evaluation: Assesses performance with eval.py using multiple metrics.
 ## Project Overview
 
 The RAG Multi-Agent System is designed to provide a robust and user-friendly conversational AI experience. It goes beyond simple question answering by incorporating the following key features:

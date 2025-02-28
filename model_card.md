@@ -8,6 +8,7 @@
 - **Date**: February 27, 2025
 - **Author**: Wissal Ben Othmen, Master’s student in AI and Data Science, Paris Dauphine University - Campus Tunis
 - **Contact**: [wissal.benothmen01@gmail.com](mailto:wissal.benothmen01@gmail.com)
+- **Superviseur**: M. Florian Bastin
 - **Description**: This system is a Retrieval-Augmented Generation (RAG) conversational AI designed to deliver precise, source-specific answers from a corpus of research articles and arXiv papers. It integrates Google’s Gemini 1.5 Pro for generation, FAISS with `all-MiniLM-L6-v2` embeddings for retrieval, and a Flask-based web interface with PostgreSQL on Google Cloud SQL for data persistence. The multi-agent architecture includes specialized components for input processing, retrieval, prompt engineering, answer generation, source tracking, and feedback collection.
 - **Architecture**:
   - **Retrieval Component**:
