@@ -277,4 +277,86 @@ The `eval.py` script calculates the following metrics:
 *   **NDCG (Normalized Discounted Cumulative Gain):**  A ranking quality metric that considers the position of relevant documents in the retrieved list. Higher NDCG is better.
 *   **F1-Score:** Harmonic mean of precision and recall, providing a balanced measure of retrieval effectiveness.Higher F1-Score reflects a robust retrieval process.
 
+- **Results**:
+  - **Summary**:
+    - Avg Semantic Similarity: 0.71
+    - Avg Precision: 0.81
+    - Avg Recall: 0.97
+    - Avg F1-Score: 0.84
+    - Avg Faithfulness: 0.66
+    - Avg NDCG: 0.67
+    - Avg Latency: 9.04 seconds
+    - Total Examples: 10 (all valid)
+      
 These metrics provide a comprehensive assessment of the system's performance, covering both the quality of the generated answers and the effectiveness of the retrieval process. The results are saved in a JSON file for detailed analysis.
+
+## Unitests
+The project includes a comprehensive suite of unit tests located in the tests/ directory, ensuring the reliability and functionality of all key components. Each test file targets a specific module, and all tests have passed successfully, validating the system’s core operations. Below are screenshots showcasing the successful execution of these tests:
+
+* test_retriever.py: Verifies the document retrieval functionality in retriever.py
+![Screenshot of the Unitests](Screenshots/unitest1.png)
+* test_answer_generator.py: Validates answer generation in answer_generator.py
+  ![Screenshot of the Unitests](Screenshots/unnitest2.png)
+* test_prompt_engineer.py: Tests the dynamic prompt selection logic in prompt_engineer.py
+![Screenshot of the Unitests](Screenshots/unitest3.png)
+* test_source_tracker.py: Ensures source_tracker.py correctly deduplicates sources and assigns focus areas, enhancing response transparency.
+![Screenshot of the Unitests](Screenshots/unitest4.png)
+* test_db_manager.py: Confirms the database operations in db_manager.py
+![Screenshot of the Unitests](Screenshots/unitest5.png)
+* test_process_docs.py: Verifies document processing and indexing in process_docs.py
+![Screenshot of the Unitests](Screenshots/unitest6.png)
+* test_vectordb.py: Tests the VectorDB class in vectordb.py
+![Screenshot of the Unitests](Screenshots/unitest7.png)
+* test_app.py: Validates the Flask application in app.py
+![Screenshot of the Unitests](Screenshots/unitest8.png)
+## Code Quality
+Code quality is maintained using Pylint and Flake8, ensuring adherence to PEP 8 standards and enhancing maintainability. Pylint scores consistently exceed 9/10 across files, reflecting clean, well-structured code. Below are screenshots demonstrating Pylint analysis for selected files, showcasing compliance with best practices:
+![Screenshot of the Application](Screenshots/pylint3.png)
+![Screenshot of the Application](Screenshots/pylint2.png)
+![Screenshot of the Application](Screenshots/pylint4.png)
+![Screenshot of the Application](Screenshots/pylint1.png)
+![Screenshot of the Application](Screenshots/pylint5.png)
+![Screenshot of the Application](Screenshots/pylint6.png)
+![Screenshot of the Application](Screenshots/pylint7.png)
+
+## cloud screenshots
+The system leverages Google Cloud Storage (GCS) and Cloud SQL PostgreSQL for scalable storage and data persistence. Below are screenshots illustrating the cloud setup
+
+![Screenshot of the Application](Screenshots/cloud1.png)
+![Screenshot of the Application](Screenshots/cloud2.png)
+
+## demonstation of interfaces
+The web interface provides an intuitive user experience, with key functionalities demonstrated below through screenshots:
+* **index interface**
+The landing page welcomes users, offering an entry point to start conversations and explore features
+![Screenshot of the Application](Screenshots/demo1.png)
+* **Chat Interface**
+  Displays the chat interface before querying, ready for user input.
+![Screenshot of the Application](Screenshots/demo2.png)
+* **Chat Interface**
+* Shows a user entering a question, highlighting the input process.
+![Screenshot of the Application](Screenshots/demo3.png)
+* **Chat Interface**
+  Presents the AI-generated answer, formatted in markdown for readability.
+![Screenshot of the Application](Screenshots/demo4.png)
+* **Chat Interface**
+  Displays source cards with document details, similarity scores, and focus areas.
+![Screenshot of the Application](Screenshots/demo5.png)
+* **Chat Interface**
+  Additional view of sources, including arXiv references with download/interact options.
+![Screenshot of the Application](Screenshots/demo6.png)
+* **Interact with Specific Article**
+Shows the /interact/<arxiv_id> page with a summary of an arXiv article.
+Demonstrates querying the article content, with a detailed response based on the PDF.
+![Screenshot of the Application](Screenshots/demo7.png)
+![Screenshot of the Application](Screenshots/demo8.png)
+* **Chat History Interface**
+* ![Screenshot of the Application](Screenshots/demo9.png)
+![Screenshot of the Application](Screenshots/demo10.png)
+![Screenshot of the Application](Screenshots/demo11.png)
+![Screenshot of the Application](Screenshots/demo12.png)
+
+
+
+
+
